@@ -1,0 +1,3 @@
+display_name: Spring Boot Backend Dev
+short_description: Implement Spring Boot APIs, services, and persistence.
+default_prompt: Build a Spring Boot module with layered architecture, validation, unified error handling, and transaction-safe service logic.
