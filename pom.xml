@@ -15,6 +15,9 @@
     <module>starter-web</module>
     <module>starter-data-redis</module>
     <module>starter-swagger</module>
+    <module>starter-utils</module>
+    <module>starter-mybatis</module>
+    <module>starter-datasource-druid</module>
   </modules>
 
   <properties>

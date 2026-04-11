@@ -1,57 +1,55 @@
 package com.xiaoss.starter.redis.autoconfigure;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.jsontype.impl.LaissezFaireSubTypeValidator;
 import com.xiaoss.starter.redis.properties.RedisStarterProperties;
 import com.xiaoss.starter.redis.support.RedisOpsSupport;
+import io.lettuce.core.api.StatefulConnection;
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.boot.autoconfigure.data.redis.LettuceClientConfigurationBuilderCustomizer;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
-import org.springframework.data.redis.connection.RedisConnectionFactory;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.data.redis.connection.lettuce.LettucePoolingClientConfiguration;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 @AutoConfiguration
-@ConditionalOnClass(RedisTemplate.class)
+@ConditionalOnClass(StringRedisTemplate.class)
 @EnableConfigurationProperties(RedisStarterProperties.class)
 public class RedisAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory factory) {
-        RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(factory);
-
-        StringRedisSerializer keySerializer = new StringRedisSerializer();
-        GenericJackson2JsonRedisSerializer valueSerializer =
-            new GenericJackson2JsonRedisSerializer(defaultObjectMapper());
-
-        redisTemplate.setKeySerializer(keySerializer);
-        redisTemplate.setHashKeySerializer(keySerializer);
-        redisTemplate.setValueSerializer(valueSerializer);
-        redisTemplate.setHashValueSerializer(valueSerializer);
-        redisTemplate.afterPropertiesSet();
-        return redisTemplate;
+    public RedisOpsSupport redisOpsSupport(StringRedisTemplate stringRedisTemplate,
+                                           ObjectMapper objectMapper,
+                                           RedisStarterProperties properties) {
+        return new RedisOpsSupport(stringRedisTemplate, objectMapper, properties);
     }
 
     @Bean
+    @ConditionalOnProperty(prefix = "redis.pool", name = "enabled", havingValue = "true", matchIfMissing = true)
     @ConditionalOnMissingBean
-    public RedisOpsSupport redisOpsSupport(RedisTemplate<String, Object> redisTemplate,
-                                           RedisStarterProperties properties) {
-        return new RedisOpsSupport(redisTemplate, properties);
+    public GenericObjectPoolConfig<StatefulConnection<?, ?>> redisPoolConfig(RedisStarterProperties properties) {
+        RedisStarterProperties.Pool pool = properties.getPool();
+        GenericObjectPoolConfig<StatefulConnection<?, ?>> config = new GenericObjectPoolConfig<>();
+        config.setMaxTotal(pool.getMaxActive());
+        config.setMaxIdle(pool.getMaxIdle());
+        config.setMinIdle(pool.getMinIdle());
+        config.setMaxWait(pool.getMaxWait());
+        return config;
     }
 
-    private ObjectMapper defaultObjectMapper() {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.setVisibility(PropertyAccessor.ALL, JsonAutoDetect.Visibility.ANY);
-        objectMapper.activateDefaultTyping(LaissezFaireSubTypeValidator.instance,
-            ObjectMapper.DefaultTyping.NON_FINAL, JsonTypeInfo.As.PROPERTY);
-        return objectMapper;
+    @Bean
+    @ConditionalOnProperty(prefix = "redis.pool", name = "enabled", havingValue = "true", matchIfMissing = true)
+    @ConditionalOnMissingBean(name = "xiaossRedisLettucePoolCustomizer")
+    public LettuceClientConfigurationBuilderCustomizer xiaossRedisLettucePoolCustomizer(
+        GenericObjectPoolConfig<StatefulConnection<?, ?>> redisPoolConfig) {
+        return builder -> {
+            if (builder instanceof LettucePoolingClientConfiguration.LettucePoolingClientConfigurationBuilder poolingBuilder) {
+                poolingBuilder.poolConfig(redisPoolConfig);
+            }
+        };
     }
 }
