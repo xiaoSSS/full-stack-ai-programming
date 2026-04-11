@@ -1,0 +1,3 @@
+display_name: Vue Component Packaging
+short_description: Design reusable Vue components and package contracts.
+default_prompt: Create a reusable Vue component with clear props/events/slots API, accessibility defaults, and versioning guidance.
