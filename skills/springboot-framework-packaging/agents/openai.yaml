@@ -1,0 +1,3 @@
+display_name: Spring Boot Framework Packaging
+short_description: Package reusable backend capabilities as starters.
+default_prompt: Design a Spring Boot starter with conditional auto-configuration, configuration properties, and safe defaults for multi-service reuse.
