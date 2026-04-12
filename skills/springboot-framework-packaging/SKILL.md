@@ -29,3 +29,11 @@ Read details in:
 
 Use scaffolding resources:
 - `assets/starter-template/`
+
+
+## Review and harden abstractions
+
+- Prefer structured properties over flat keys, while keeping compatibility aliases.
+- Add strict-mode validation for infra features (datasource routing, messaging, security).
+- Ensure extension points support nested invocations and ordering (AOP/context holders).
+- Document production defaults and migration guidance in references.
