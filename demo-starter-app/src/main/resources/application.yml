@@ -1,0 +1,56 @@
+server:
+  port: 8088
+
+spring:
+  application:
+    name: demo-starter-app
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:demo;MODE=MYSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
+    username: sa
+    password:
+
+# starter-datasource-druid
+# Supports compatibility key datasource.druid.read-write-separation-enabled as well.
+datasource:
+  druid:
+    url: jdbc:h2:mem:demo;MODE=MYSQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
+    username: sa
+    password:
+    routing:
+      enabled: false
+      annotation-enabled: true
+      strict: true
+
+# starter-data-redis
+redis:
+  key-prefix: demo:
+  default-ttl: 10m
+  null-value-ttl: 60s
+  null-value-marker: "__NULL__"
+
+springdoc:
+  api-docs:
+    enabled: true
+
+# starter-security-permission
+permission:
+  enabled: true
+  ignore-paths:
+    - /demo/login
+    - /actuator/**
+    - /swagger-ui/**
+    - /v3/api-docs/**
+  auth:
+    header: Authorization
+    prefix: "Bearer "
+    issuer: demo-starter-app
+    secret: "demo-starter-app-secret-key-change-in-prod-2026"
+    access-ttl: 2h
+    refresh-ttl: 7d
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
