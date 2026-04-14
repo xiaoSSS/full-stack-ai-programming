@@ -65,7 +65,7 @@ public class JwtTokenService implements TokenService {
 
     @Override
     public void revoke(String token) {
-        tokenStore.revoke(token, properties.getRefreshTtl());
+        tokenStore.revoke(token, resolveRemainingTtl(token));
     }
 
     @Override
@@ -104,6 +104,27 @@ public class JwtTokenService implements TokenService {
     private javax.crypto.SecretKey signingKey() {
         byte[] keyBytes = properties.getSecret().getBytes(StandardCharsets.UTF_8);
         return Keys.hmacShaKeyFor(keyBytes.length >= 32 ? keyBytes : padKey(keyBytes));
+    }
+
+    private Duration resolveRemainingTtl(String token) {
+        try {
+            Claims claims = Jwts.parser().verifyWith(signingKey())
+                    .clockSkewSeconds(properties.getClockSkewSeconds())
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+            Date expiration = claims.getExpiration();
+            if (expiration == null) {
+                return properties.getRefreshTtl();
+            }
+            Duration remaining = Duration.between(Instant.now(), expiration.toInstant());
+            if (remaining.isNegative()) {
+                return Duration.ZERO;
+            }
+            return remaining;
+        } catch (JwtException | IllegalArgumentException e) {
+            return properties.getRefreshTtl();
+        }
     }
 
     private byte[] padKey(byte[] raw) {

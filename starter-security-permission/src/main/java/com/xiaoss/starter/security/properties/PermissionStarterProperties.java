@@ -22,6 +22,7 @@ public class PermissionStarterProperties {
     public static class AuthProperties {
         private String header = "Authorization";
         private String prefix = "Bearer ";
+        private String tokenStore = "redis";
         private String issuer = "xiaoss";
         private String secret = "change-me-to-a-strong-secret-key";
         private Duration accessTtl = Duration.ofHours(2);
@@ -32,6 +33,8 @@ public class PermissionStarterProperties {
         public void setHeader(String header) { this.header = header; }
         public String getPrefix() { return prefix; }
         public void setPrefix(String prefix) { this.prefix = prefix; }
+        public String getTokenStore() { return tokenStore; }
+        public void setTokenStore(String tokenStore) { this.tokenStore = tokenStore; }
         public String getIssuer() { return issuer; }
         public void setIssuer(String issuer) { this.issuer = issuer; }
         public String getSecret() { return secret; }

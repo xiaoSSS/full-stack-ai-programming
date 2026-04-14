@@ -10,6 +10,9 @@ public class InMemoryTokenStore implements TokenStore {
 
     @Override
     public void revoke(String token, Duration ttl) {
+        if (ttl == null || ttl.isZero() || ttl.isNegative()) {
+            return;
+        }
         revoked.put(token, Instant.now().plus(ttl));
     }
 

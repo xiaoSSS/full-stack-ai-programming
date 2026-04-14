@@ -7,16 +7,19 @@ import com.xiaoss.starter.security.auth.InMemoryTokenStore;
 import com.xiaoss.starter.security.auth.JwtAuthenticationFilter;
 import com.xiaoss.starter.security.auth.JwtTokenService;
 import com.xiaoss.starter.security.auth.PermissionProvider;
+import com.xiaoss.starter.security.auth.RedisTokenStore;
 import com.xiaoss.starter.security.auth.RoleProvider;
 import com.xiaoss.starter.security.auth.TokenService;
 import com.xiaoss.starter.security.auth.TokenStore;
 import com.xiaoss.starter.security.properties.PermissionStarterProperties;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -31,8 +34,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class PermissionAutoConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean
-    public TokenStore tokenStore() {
+    @ConditionalOnMissingBean(TokenStore.class)
+    @ConditionalOnBean(StringRedisTemplate.class)
+    @ConditionalOnProperty(prefix = "permission.auth", name = "token-store", havingValue = "redis", matchIfMissing = true)
+    public TokenStore redisTokenStore(StringRedisTemplate stringRedisTemplate) {
+        return new RedisTokenStore(stringRedisTemplate);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(TokenStore.class)
+    public TokenStore inMemoryTokenStore() {
         return new InMemoryTokenStore();
     }
 
