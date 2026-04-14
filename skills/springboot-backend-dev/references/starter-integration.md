@@ -50,3 +50,12 @@
 - Keep login endpoints in `permission.ignore-paths` to allow anonymous access.
 - Prefer annotations on service methods: `@RequireLogin`, `@RequirePermission`, `@RequireRole`.
 - For custom RBAC source, provide `PermissionProvider` / `RoleProvider` beans in business services.
+
+
+## Demo template workflow
+
+1. Copy structure from `demo-starter-app` (`Application`, `controller`, `application.yml`, `README`).
+2. Keep starter dependency order consistent with this guide.
+3. Keep `/demo/login`-equivalent endpoint in ignore paths for token bootstrap.
+4. Keep at least one secured endpoint and one cache endpoint as smoke examples.
+5. Verify with curl commands before handing off to business implementation.

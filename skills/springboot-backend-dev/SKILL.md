@@ -22,6 +22,8 @@ description: Build and maintain Spring Boot backend services including API desig
 
 ## Build robust APIs
 
+- Prefer `demo-starter-app` as baseline when creating new backend services to keep starter integration consistent.
+
 1. Validate input with bean validation.
 2. Use unified response and error format.
 3. Define stable error code taxonomy.
@@ -38,6 +40,7 @@ Read details in:
 - `references/exception-and-response.md`
 - `references/starter-integration.md`
 - `references/security-permission-integration.md`
+- `references/demo-starter-template.md`
 
 Use scaffolding resources:
 - `assets/module-template/`

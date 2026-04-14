@@ -19,6 +19,7 @@
     <module>starter-security-permission</module>
     <module>starter-mybatis</module>
     <module>starter-datasource-druid</module>
+    <module>demo-starter-app</module>
   </modules>
 
   <properties>
